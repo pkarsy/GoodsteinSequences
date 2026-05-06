@@ -152,7 +152,8 @@ From the shell:
 ```
 python goodstein.py <initial_value> <initial_base> [-b <max_base>]
 python goodstein.py 10 3
-python goodstein.py 10 3 -b 500   # stop when base exceeds 500
+# The famous G(4), we cannot print it all, for sure
+python goodstein.py 4 2 -b 10000
 ```
 
 Or from the Python interpreter:
