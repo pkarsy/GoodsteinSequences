@@ -1,25 +1,94 @@
 # GoodsteinSequences
-A learning tool to help comprehending the enormous Goodstein Sequences
 
-Anyone how tried to study the Goodstein theorum/sequences knows that the sequence G(3) is very small but on the other hand G(4) in incomprehensibly long. And yet theese huge numbers will start at some point to decrease and inevitably(this is proved) the sequence terminates at zero.
+My try to understand the enormous Goodstein Sequences.
 
-The simplification cosists of:
-- skip trivial repeated steps making it more manageable.
-- showing explanations on what it is doing
-- allows to start with bases other than 2. For example
+## What is a Goodstein sequence?
 
+A Goodstein sequence starts from a number `n` written in **hereditary base-`b`** representation — not only the number but also every exponent is expanded in the same base. Then you repeatedly:
+
+1. **Increase the base** by 1 (2 → 3 → 4 → …)
+2. **Subtract 1** from the value
+
+Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (proved by Reuben Goodstein in 1944) proves the sequence always reaches 0. Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone; it requires the tools of set theory (specifically, ordinal arithmetic up to ε₀).
+
+Anyone who tried to study these sequences knows that G(3) is very small but G(4) is so long there is no way to visualize it or run the full sequence via a program. And yet it will start at some point to decrease one by one, and inevitably (again, this is proved) the sequence terminates at zero.
+
+## Key insight
+
+Although the bases can grow very fast, the critical point is that the **exponents never grow** and occasionally shrink. For example:
+
+```
+5^2 → 6^2 - 1 → 5·6¹ + 5
+```
+
+When the number has the form `1·base + const` the value cannot grow anymore, and after many steps the base becomes larger than the number itself (`0·base + const`). From then on the number shrinks by one each step until it reaches 0.
+
+Note this is NOT a formal proof, but explains what happens. And yes the idea is very simple, and yes the idea cannot be expressed in simple (= Peano) arithmetic.
+
+## How the code works
+
+The program uses an **efficient symbolic representation** that avoids ever computing the astronomically large integers. It works directly on a recursive tree structure rather than converting to `int`.
+
+### Hereditary representation (internal format)
+
+A number is stored as a nested Python structure:
+
+| Type | Meaning | Example |
+|------|---------|---------|
+| `int` | A simple constant `< base` | `5` |
+| `tuple (coeff, exponent)` | `coeff · base`<sup>exponent</sup> | `(2, (1,1))` → `2·B¹` |
+| `list` | A sum of terms | `[(1, 2), 5]` → `B² + 5` |
+
+The exponent itself can be another tuple or list — that's the "hereditary" part.
+
+### Key functions
+
+| Function | Purpose |
+|----------|---------|
+| `int_to_hereditary(n, b)` | Converts an integer `n` into hereditary base-`b` form |
+| `hereditary_to_int(h, b)` | Converts back to integer (for debugging — overflows on large sequences) |
+| `hereditary_to_string(h, b)` | Pretty-prints the representation (e.g. `3^2+1`) |
+| `constant(h)` | Extracts the constant term (the rightmost integer, if any) |
+| `hereditary_sub_one(h, b)` | Subtracts 1 *without* converting to int — works on the symbolic form directly |
+| `hereditary_sub(h, b, n)` | Subtracts `n` from a hereditary form (used for the skip-ahead optimization) |
+| `hereditary_trivial_steps(h, b)` | Skips the "constant decay" segment at once |
+
+### The `Goodstein` class
+
+```python
+from goodstein import Goodstein
+
+g = Goodstein(10, 3)   # start value 10, initial base 3
+g.run()                # prints the full sequence
+```
+
+**Methods:**
+- `run(skip=True, showVal=False, showStep=False, maxBase=1_000_000_000)` — prints the sequence. When `skip` is on (default) it skips ahead in chunks where the constant term is large, marking those jumps with `[Decomposing]`.
+- `step(n=1)` — advances by one or more steps (increase base + subtract).
+- `base()` / `value()` — current base and hereditary value.
+- `constant()` — the constant term (0 if the number is a pure power).
+- `reset()` — resets to the initial value and base.
+- `is_zero()` — has the sequence terminated?
+- `__int__()` — converts back to an integer (beware: can be astronomically large).
+
+## Program shortcuts
+
+The python program does some shortcuts:
+- skips trivial repeated steps making it more manageable
+- shows explanations on what it is doing
+- allows starting with bases other than 2. For example:
+
+```
 Goodstein(10,3) ends at base 159
 Goodstein(11,3) ends at base 383
 Goodstein(12,3) ends at base 2047
+```
 
-we can easily see that althoug the bases can grow  seemingly "uncontrollably", the critical point is that the exponents never grow and occassionally shrink for example 5^2 -> 6^2-1 = 5*6^1+5
-
-When the number has the form 1*base+const  the numbers cannot grow anymore, and after many steps the base becomes larger than the number itself. From now on the number shrings one by one until reaches 0.
-
-Here is the output of
-> python goodstein.py 10 3
+## Example output
 
 ```
+> python goodstein.py 10 3
+
 Base=3 : 3^2+1
 Base=4 : 4^2
 [Decomposing]
@@ -66,3 +135,30 @@ Base=158 : 1
 Base=159 : 0
 ```
 
+> **Disclaimer:** I am not a mathematician — nothing here is authoritative. This is
+> a personal exploration project.
+>
+> **Note:** This is an **educational** tool, not a computational one. The famous
+> Goodstein sequence starting from 4 in base 2 — G(4) — terminates, but its full
+> length is incomprehensibly large (far beyond the number of atoms in the universe).
+> No program can print it. Stick to small initial values (≤ 12) and a reasonable
+> **starting base** — the joy is watching the structure decompose, not brute-forcing
+> huge numbers.
+
+## Running the program
+
+From the shell:
+
+```
+python goodstein.py <initial_value> <initial_base> [-b <max_base>]
+python goodstein.py 10 3
+python goodstein.py 10 3 -b 500   # stop when base exceeds 500
+```
+
+Or from the Python interpreter:
+
+```python
+import goodstein
+g = goodstein.Goodstein(10, 3)
+g.run()
+```

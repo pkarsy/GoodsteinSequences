@@ -1,8 +1,10 @@
 
+#!/usr/bin/env python3
+import sys
 
 def int_to_hereditary(n,b):
     '''
-    Converts an integer to a hereditary represented number
+    Converts an integer to a hereditary representation of a number
     '''
     if n<b:
         return n
@@ -111,37 +113,47 @@ def constant(h):
     else:
         raise Exception(f"hereditary_constant({h}: Unknown error")
 
-'''
-def hereditary_subtract_one(h, b):
-    Removes 1 from a herediatary represented number.
+
+def hereditary_sub_one(h, b):
+    '''
+    Removes 1 from a hereditary represented number.
     Does not increase the base, this is a job of the calling function BEFORE the call
     Tries to do the correct way. Without decomposing the whole representation to int
-    This is crusicial as even seemingly "innocent" herediaty represented numbers
+    This is crucial as even seemingly "innocent" herediaty represented numbers
     like 8^8^8 can have a huge number of digits. If the rightmost element is constant
-    removes 1, otherwise goes to the least signmificant power, etc
-    
-    #if type(power) == list:
-    #    raise Exception(f'{power} is not a tuple')
+    removes 1, otherwise goes to the least significant power and decomposes it.
+    '''
     # hereditary_validate( h, b )
-    #
     if type(h)==int:
         if h>0:
             return h-1
         else:
             raise Exception(f'Cannot remove from 0')
     elif type(h)==tuple:
+        # a tuple represents a power B^(int,tuple,list)
         if h[0]==1: # the coefficient is 1
             if h[1]==1: # the exponent is 1, n = 1*B^1 -> B
-                return (b-1,b)
+                return b-1
             else:
-                
-                # the exponenet is > 1 : n= B^e -1  -> Β*B^(e-1) -1 
-                #  -> (Β-1)*Β^(e-1)+B^(e-1)-1
-                # -> 
-                newepx = hereditary_subtract_one( (h[1],b) )
+                # the exponent is > 1 : result = B^e -1  -> Β*B^(e-1) -1 
+                # -> (Β-1)*Β^(e-1)+B^(e-1)-1
+                newexp = hereditary_sub_one(h[1],b)
+                bpow = (1, newexp)
+                bpowminus = hereditary_sub_one(bpow,b)
+                if type(bpowminus)==int or type(bpowminus)==tuple:
+                    return [(b-1, newexp), bpowminus ]
+                elif type(bpowminus)==list:
+                    return [(b-1, newexp)] + bpowminus
+                else:
+                    raise Exception(f'Unknown error')
+        else:
+            pass
+            # c*B^e -1 -> (c-1)*B^e + (B^e -1)
+            bpow = (1, h[1])
+            bpowminus = hereditary_sub_one(bpow,b)
+    else:
+        raise Exception(f'The list element must be int or tuple')
 
-                return [(b-1, newepx)]+hereditary_subtract_one()
-'''
 
 
 def hereditary_sub(h, b, n):
@@ -154,7 +166,7 @@ def hereditary_sub(h, b, n):
         return h-n
     elif type(h)==tuple:
         if n!=1:
-            raise Exception("Cannot do the subtstraction, only 1 allowed, with no constant")
+            raise Exception("Cannot do the subtraction, only 1 allowed, with no constant")
         decomp = hereditary_to_int(h, b+1) - 1
         return int_to_hereditary(decomp, b+1)
     elif type(h)==list:
@@ -180,9 +192,9 @@ def hereditary_sub(h, b, n):
                     h.append(decomb)
                 else:
                     h=h+decomb
-                return (h,b+1)
+                return h
             else:
-                raise Exception("Cannot do the subtstraction, only 1 allowed, with no constant")
+                raise Exception("Cannot do the subtraction, only 1 allowed, with no constant")
 
 def hereditary_trivial_steps(h, b):
     trivialSteps = constant(h)
@@ -232,14 +244,12 @@ class Goodstein:
         '''
         Decomposes the hereditary representation to the equal integer value.
         Note that for most representations this operation cannot be done due
-        to the sheere size of the numbers
+        to the sheer size of the numbers
         '''
         return hereditary_to_int(self.__value__, self.__base__)
     
     def __eq__(self, other):
-        # Έλεγχος αν το 'other' είναι της ίδιας κλάσης και σύγκριση ISBN
-        #if not isinstance(other, Book):
-        #    return False
+        
         return self.base()==other.base() and str(self) == str(other)
     
     def constant(self):
@@ -276,6 +286,7 @@ class Goodstein:
             if self.is_zero():
                 break
             if self.base()>maxBase:
+                print(f"[Limit reached: base {self.base()} exceeds max base {maxBase}. Increase with -b.]")
                 break
             c = self.constant()
             if c+4 > self.base():
@@ -287,3 +298,18 @@ class Goodstein:
             else:
                 showstp(1)
                 self.step(1)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Generate a Goodstein sequence")
+    parser.add_argument("initial_value", type=int,
+                        help="starting value of the sequence")
+    parser.add_argument("initial_base", type=int,
+                        help="starting base (e.g. 2)")
+    parser.add_argument("-b", "--max-base", type=int, default=1_000_000_000,
+                        help="stop when the base exceeds this limit (default: 1_000_000_000)")
+    args = parser.parse_args()
+    g = Goodstein(args.initial_value, args.initial_base)
+    g.run(maxBase=args.max_base)
