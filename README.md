@@ -23,7 +23,7 @@ Although the bases can grow very fast, the critical point is that the **exponent
 
 When the number has the form `1·base + const` the value cannot grow anymore, and after many steps the base becomes larger than the number itself (`0·base + const`). From then on the number shrinks by one each step until it reaches 0.
 
-Note this is NOT a formal proof, but explains what happens. And yes the idea is very simple, and yes the idea cannot be expressed in simple (= Peano) arithmetic.
+Note this is NOT a formal proof, but it gives the intuition. The definition of a Goodstein sequence is straightforward, yet the theorem that every sequence terminates — though expressible in Peano arithmetic — cannot be proved within Peano arithmetic itself.
 
 ## How the code works
 
