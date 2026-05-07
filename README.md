@@ -2,6 +2,16 @@
 
 My try to understand the enormous Goodstein Sequences.
 
+> **Disclaimer:** I am not a mathematician — nothing here is authoritative. This is
+> a personal exploration project. I am not even familiar with the proofs involved.
+
+> **Note:** This is an **educational** tool, not a computational one. The famous
+> Goodstein sequence starting from 4 in base 2 — G(4) — terminates, but its full
+> length is incomprehensibly large (FAR beyond the number of atoms in the universe).
+> No program or computer system can print it. Stick to small initial values (≤ 12) and a reasonable
+> starting base (>2) — the joy is watching the structure decompose, not brute-forcing
+> huge numbers.
+
 ## What is a Goodstein sequence?
 
 A Goodstein sequence starts from a number `n` written in **hereditary base-`b`** representation — not only the number but also every exponent is expanded in the same base. Then you repeatedly:
@@ -9,9 +19,12 @@ A Goodstein sequence starts from a number `n` written in **hereditary base-`b`**
 1. **Increase the base** by 1 (2 → 3 → 4 → …)
 2. **Subtract 1** from the value
 
-Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (proved by Reuben Goodstein in 1944) proves the sequence always reaches 0. Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone; it requires the tools of set theory (specifically, ordinal arithmetic up to ε₀).
+Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (proved by Reuben Goodstein in 1944) proves the sequence always reaches 0.
 
-Anyone who tried to study these sequences knows that G(3) is very small but G(4) is so long there is no way to visualize it or run the full sequence via a program. And yet it will start at some point to decrease one by one, and inevitably (again, this is proved) the sequence terminates at zero.
+
+**Sidenote:** Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone (the standard axioms); it requires the tools of set theory. The proof (that it is not provable in PA) finalized much later (Kirby-Paris 1982), and obviously it is a much harder problem.
+
+Anyone who tried to study these sequences knows that G(3) is very small but G(4) is so long there is no way to visualize it or run the full sequence via a program. And yet it will start at some point to decrease one by one, and inevitably the sequence terminates at zero.
 
 ## Key insight
 
@@ -73,7 +86,7 @@ g.run()                # prints the full sequence
 
 ## Program shortcuts
 
-The python program does some shortcuts:
+The python script does some shortcuts:
 - skips trivial repeated steps making it more manageable
 - shows explanations on what it is doing
 - allows starting with bases other than 2. For example:
@@ -135,16 +148,6 @@ Base=158 : 1
 Base=159 : 0
 ```
 
-> **Disclaimer:** I am not a mathematician — nothing here is authoritative. This is
-> a personal exploration project.
->
-> **Note:** This is an **educational** tool, not a computational one. The famous
-> Goodstein sequence starting from 4 in base 2 — G(4) — terminates, but its full
-> length is incomprehensibly large (far beyond the number of atoms in the universe).
-> No program can print it. Stick to small initial values (≤ 12) and a reasonable
-> **starting base** — the joy is watching the structure decompose, not brute-forcing
-> huge numbers.
-
 ## Running the program
 
 From the shell:
@@ -153,6 +156,7 @@ From the shell:
 python goodstein.py <initial_value> <initial_base> [-b <max_base>]
 python goodstein.py 10 3
 # The famous G(4), we cannot print it all, for sure
+# The code can go beyond 10000 if skips trivial steps
 python goodstein.py 4 2 -b 10000
 ```
 
