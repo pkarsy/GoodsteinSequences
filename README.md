@@ -19,20 +19,31 @@ A Goodstein sequence starts from a number `n` written in **hereditary base-`b`**
 1. **Increase the base** by 1 (2 → 3 → 4 → …)
 2. **Subtract 1** from the value
 
-Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (proved by Reuben Goodstein in 1944) proves the sequence always reaches 0.
+Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (Reuben Goodstein, 1944) proves the sequence always reaches 0.
 
+**Sidenote:** Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone (the standard axioms); it requires the tools of set theory. The proof (that it is not provable in PA) finalized much later (Kirby-Paris 1982), and obviously it is a much harder problem. But it is also what makes the sequence so important.
 
-**Sidenote:** Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone (the standard axioms); it requires the tools of set theory. The proof (that it is not provable in PA) finalized much later (Kirby-Paris 1982), and obviously it is a much harder problem.
+Indeed, Goodstein's theorem is a concrete example of a true statement that is not provable in Peano arithmetic (PA), but is provable in stronger set theories like ZFC. **This makes it a paradigmatic instance of Gödel incompleteness:** a natural mathematical fact that lies beyond the reach of PA, much like the self-referential sentence constructed in Gödel's proof, but without the artificial flavor. The proof in set theory uses infinite ordinals (up to ε₀) to show termination, a technique not available in PA. So Goodstein sequences provide a clear illustration of a non-provable (in PA) statement.
 
-Anyone who tried to study these sequences knows that G(3) is very small but G(4) is so long there is no way to visualize it or run the full sequence via a program. And yet it will start at some point to decrease one by one, and inevitably the sequence terminates at zero.
+Perhaps even more interesting is that the theorum seems (by seeing some examples), **trivially true**
 
 ## Key insight
 
-Although the bases can grow very fast, the critical point is that the **exponents never grow** and occasionally shrink. For example:
+Although the bases can grow very fast, the critical point is that the **non base exponents and coefficients never grow** and occasionally shrink. For example:
 
-```
-5^2 → 6^2 - 1 → 5·6¹ + 5
-```
+$$
+\text{G(4): }\qquad
+2^{2} \;\xrightarrow{+1}\; 3^{3}-1 \;\xrightarrow{\;}\; 2{\cdot}3^{2}+2{\cdot}3+2
+$$
+$$
+2{\cdot}3^{2}+2{\cdot}3+2 \;\xrightarrow{+1}\; 2{\cdot}4^{2}+2{\cdot}4+1
+$$
+$$
+2{\cdot}4^{2}+2{\cdot}4+1 \;\xrightarrow{+1}\; 2{\cdot}5^{2}+2{\cdot}5
+$$
+$$
+2{\cdot}5^{2}+2{\cdot}5 \;\xrightarrow{+1}\; 2{\cdot}6^{2}+2{\cdot}6-1 = 2{\cdot}6^{2}+6+5
+$$
 
 When the number has the form `1·base + const` the value cannot grow anymore, and after many steps the base becomes larger than the number itself (`0·base + const`). From then on the number shrinks by one each step until it reaches 0.
 
