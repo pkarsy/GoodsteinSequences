@@ -12,7 +12,7 @@ My try to understand the enormous Goodstein Sequences.
 > length is incomprehensibly large (FAR beyond the number of atoms in the universe).
 > No program or computer system can print it. Stick to small initial values (≤ 12) and a reasonable
 > starting base (>2) — the joy is watching the structure decompose, not brute-forcing
-> huge numbers.
+> huge numbers. When comfortable, you can increase moderatelly the initial value, and the stop base(-b)
 
 ## What is a Goodstein sequence?
 
@@ -23,11 +23,11 @@ A Goodstein sequence starts from a number `n` written in **hereditary base-`b`**
 
 Despite looking like it should grow forever (the base keeps increasing), **Goodstein's theorem** (Reuben Goodstein, 1944) proves the sequence always reaches 0.
 
-**Sidenote:** Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone (the standard axioms); it requires the tools of set theory. The proof (that it is not provable in PA) was finalized much later (Kirby–Paris 1982), and obviously it is a much harder problem. But it is also what makes the sequence so important.
+**Sidenote:** Remarkably, this theorem is independent of Peano arithmetic — it cannot be proved using ordinary arithmetic alone (the standard Peano Axioms); it requires the tools of set theory. The proof (that it is not provable in PA) was finalized much later (Kirby–Paris 1982), and obviously it is a much harder problem. But it is also what makes the sequence so important.
 
-Indeed, Goodstein's theorem is a concrete example of a true statement that is not provable in Peano arithmetic (PA), but is provable in stronger set theories like ZFC. **This makes it a paradigmatic instance of Gödel incompleteness:** a natural mathematical fact that lies beyond the reach of PA, much like the self-referential sentence constructed in Gödel's proof, but without the artificial flavor. The proof in set theory uses infinite ordinals (up to ε₀) to show termination, a technique not available in PA.
+Indeed, Goodstein's theorem is a concrete example of a true statement that is not provable in Peano arithmetic (PA), but is provable in stronger set theories like ZFC. **This makes it a paradigmatic instance of Gödel incompleteness:** a natural mathematical fact that lies beyond the reach of PA, much like the self-referential sentence constructed in Gödel's proof, but without the artificial flavor.
 
-Perhaps even more interesting is that the theorem seems (by seeing some examples) **trivially true** — and yet it cannot be proved without infinity.
+Perhaps even more interesting is that the theorem seems (by seeing some examples) **visibly true** — and yet it cannot be proved without infinity.
 
 ## Examples
 
@@ -36,12 +36,12 @@ Perhaps even more interesting is that the theorem seems (by seeing some examples
 The sequence G(4) is far too long to print, but with `-s 0` (landmark-only mode) and `-d` (no decomposing markers) we can watch its structural evolution:
 
 ```
-$ python goodstein.py 4 2 -s 0 -d
+$ python goodstein.py 4 2 -s 0 -d -b 10000000000
 B=2 : B^B
-B=5 : 2*B^2+2*B
+B=5 : 2*B^2+2*B   No more B^B
 B=11 : 2*B^2+B
 B=23 : 2*B^2
-B=47 : B^2+23*B
+B=47 : B^2+23*B   No more 2*B^2
 B=95 : B^2+22*B
 B=191 : B^2+21*B
 B=383 : B^2+20*B
@@ -65,22 +65,30 @@ B=50331647 : B^2+3*B
 B=100663295 : B^2+2*B
 B=201326591 : B^2+B
 B=402653183 : B^2
-B=805306367 : 402653183*B
-[Limit reached: base 1610612732 exceeds max base 1000000000. Increase with -b.]
+B=805306367 : 402653183*B  No more B^2
+B=1610612735 : 402653182*B
+B=3221225471 : 402653181*B
+B=6442450943 : 402653180*B
+
+...
+The python script cannot go there but our logic can
+For some unfathomably huge value of B
+the coefficient of B shrinks until B no longer appears in the sequence
+from now on the elements decrease one by one until 0
 ```
 
-Each line is a **structural landmark** — a point where the constant term has just run down to zero and the form is about to decompose. The bases follow the pattern `Bₙ₊₁ = 2·Bₙ + 1` (2, 5, 11, 23, 47, …), and without the `-b 1000000000` cap it would continue until the sequence finally reaches zero at an astronomically large base.
+Each line is a **structural landmark** — a point where the constant term has just run down to zero and the form is about to decompose. The bases follow the pattern `Bₙ₊₁ = 2·Bₙ + 1` (2, 5, 11, 23, 47, …)
 
 ### A fully printable sequence
 
-For a sequence that actually can print fully, try a smaller starting value:
+For a sequence that actually can printed fully, try a larger starting base:
 
 ```
 $ python goodstein.py 10 3
 B=3 : B^2+1
 B=4 : B^2
 [Decomposing]
-B=5 : 4*B+4
+B=5 : 4*B+4  No more B^2
 B=6 : 4*B+3
 B=7 : 4*B+2
 B=8 : 4*B+1
@@ -113,7 +121,7 @@ B=77 : B+2
 B=78 : B+1
 B=79 : B
 [Decomposing]
-B=80 : 79
+B=80 : 79 No more B. From now on the elements decrease
 B=81 : 78
 B=82 : 77
 ...
@@ -129,23 +137,9 @@ The `[Decomposing]` marker appears whenever the constant term vanishes and the n
 
 Although the bases can grow very fast, the critical point is that the **non base exponents and coefficients never grow** and occasionally shrink. For example:
 
-$$
-\text{G(4): }\qquad
-2^{2} \;\xrightarrow{+1}\; 3^{3}-1 \;\xrightarrow{\;}\; 2{\cdot}3^{2}+2{\cdot}3+2
-$$
-$$
-2{\cdot}3^{2}+2{\cdot}3+2 \;\xrightarrow{+1}\; 2{\cdot}4^{2}+2{\cdot}4+1
-$$
-$$
-2{\cdot}4^{2}+2{\cdot}4+1 \;\xrightarrow{+1}\; 2{\cdot}5^{2}+2{\cdot}5
-$$
-$$
-2{\cdot}5^{2}+2{\cdot}5 \;\xrightarrow{+1}\; 2{\cdot}6^{2}+2{\cdot}6-1 = 2{\cdot}6^{2}+6+5
-$$
-
 When the number has the form `1·base + const` the value cannot grow anymore, and after many steps the base becomes larger than the number itself (`0·base + const`). From then on the number shrinks by one each step until it reaches 0.
 
-Note this is NOT a formal proof, but it gives the intuition. The definition of a Goodstein sequence is straightforward, yet the theorem that every sequence terminates — though expressible in Peano arithmetic — cannot be proved within Peano arithmetic itself.
+Note this is NOT a formal proof, but it gives the intuition. The definition of a Goodstein sequence is straightforward, yet the theorem that every sequence terminates — though expressible in Peano arithmetic — cannot be proved within Peano arithmetic itself, as we have seen.
 
 ## How the code works
 
@@ -222,8 +216,6 @@ python goodstein.py 10 3 -B
 # Only structural landmarks, no markers:
 python goodstein.py 4 2 -s 0 -d
 
-# Stop early (G(4) would run forever otherwise):
-python goodstein.py 4 2 -b 10000
 ```
 
 Or from the Python interpreter:
