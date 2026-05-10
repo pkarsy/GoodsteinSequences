@@ -72,7 +72,7 @@ B=6442450943 : 402653180*B
 
 ...
 The python script cannot go there but our logic can
-For some unfathonably huge value of B
+For some unfathomably huge value of B
 the coefficient of B shrinks until B no longer appears in the sequence
 from now on the elements decrease one by one until 0
 ```
