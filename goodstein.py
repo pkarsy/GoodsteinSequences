@@ -1,5 +1,5 @@
-
 #!/usr/bin/env python3
+
 import sys
 
 def int_to_hereditary(n,b):
@@ -81,7 +81,7 @@ def hereditary_to_string(h, b,root=True,showBase=True):
             exp=str(b)
         else:
             exp='B'
-        exponent_her = hereditary_to_string( h[1], b, False)
+        exponent_her = hereditary_to_string( h[1], b, root=False, showBase=showBase)
         if exponent_her!="1":
             exp += "^"+exponent_her
         if h[0]==1:
@@ -91,7 +91,7 @@ def hereditary_to_string(h, b,root=True,showBase=True):
     elif type(h)==list:
         t=[]
         for e in h:
-            t.append( hereditary_to_string( e, b, root=False) )
+            t.append( hereditary_to_string( e, b, root=False, showBase=showBase) )
         if root:
             return "+".join(t)
         else:
@@ -206,11 +206,12 @@ def hereditary_trivial_steps(h, b):
 
 class Goodstein:
 
-    def __init__(self, n, b):
+    def __init__(self, n, b, symbolic_base=False):
         self.__value__ = int_to_hereditary(n,b)
         self.__base__ = b
         self.__initial_value__ = self.__value__
         self.__initial_base__ = self.__base__
+        self.__symbolic_base__ = symbolic_base
     
     def reset(self):
         '''
@@ -263,41 +264,49 @@ class Goodstein:
         self.__value__ = hereditary_trivial_steps(self.__value__, self.__base__)
     
     def __str__(self):
-        return hereditary_to_string(self.__value__, self.__base__)
+        return hereditary_to_string(self.__value__, self.__base__, showBase=not self.__symbolic_base__)
     
-    def run(self, skip=True, showVal=False, showStep=False, maxBase=1_000_000_000):
-        def showstp(c):
-            if self.constant()==0:
-                print('[Decomposing]')
-            if not showStep:
-                if c>1:
-                    print("...")
-                return
-            fmt=f"We replace base {self.base()} with {self.base()+c} and we remove {c}"
-            if c==1:
-                print(fmt)
-            else:
-                print ("[Multiple steps]:",fmt)
+    def run(self, skip=True, showVal=False, showStep=False, maxBase=1_000_000_000, showSteps=-1, showDecomposing=True):
+        steps_printed = 0
         while True:
-            if showVal:
-                print(f"Base={self.base()} : {self} - {int(self)}")
-            else:
-                print(f"Base={self.base()} : {self}")
+            c = self.constant()
+            visible = (showSteps == -1) or (steps_printed < showSteps) or (c == 0)
+
+            if visible:
+                if showVal:
+                    print(f"B={self.base()} : {self} - {int(self)}")
+                else:
+                    print(f"B={self.base()} : {self}")
+                steps_printed += 1
+
             if self.is_zero():
                 break
             if self.base()>maxBase:
                 print(f"[Limit reached: base {self.base()} exceeds max base {maxBase}. Increase with -b.]")
                 break
+
             c = self.constant()
             if c+4 > self.base():
-                showstp(1)
-                self.step(1)
-            elif c>5:
-                showstp(c-3)
-                self.step(c-3)
+                step_n = 1
+            elif c > 5:
+                step_n = c - 3
             else:
-                showstp(1)
-                self.step(1)
+                step_n = 1
+
+            if visible:
+                if self.constant()==0 and showDecomposing:
+                    print('[Decomposing]')
+                if not showStep:
+                    if step_n > 1:
+                        print("...")
+                else:
+                    fmt = f"We replace base {self.base()} with {self.base()+step_n} and we remove {step_n}"
+                    if step_n == 1:
+                        print(fmt)
+                    else:
+                        print("[Multiple steps]:", fmt)
+
+            self.step(step_n)
 
 
 if __name__ == "__main__":
@@ -310,6 +319,12 @@ if __name__ == "__main__":
                         help="starting base (e.g. 2)")
     parser.add_argument("-b", "--max-base", type=int, default=1_000_000_000,
                         help="stop when the base exceeds this limit (default: 1_000_000_000)")
+    parser.add_argument("-B", "--numeric-base", action="store_true",
+                        help="show base as its numeric value instead of B")
+    parser.add_argument("-s", "--show-steps", type=int, default=-1,
+                        help="number of steps to print before fast-forwarding to the next structural change (0 = only landmarks)")
+    parser.add_argument("-d", "--no-decomposing", action="store_true",
+                        help="suppress the [Decomposing] marker")
     args = parser.parse_args()
-    g = Goodstein(args.initial_value, args.initial_base)
-    g.run(maxBase=args.max_base)
+    g = Goodstein(args.initial_value, args.initial_base, symbolic_base=not args.numeric_base)
+    g.run(maxBase=args.max_base, showSteps=args.show_steps, showDecomposing=not args.no_decomposing)
